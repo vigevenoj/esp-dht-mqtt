@@ -18,35 +18,50 @@
 #include <osapi.h>
 #include <os_type.h>
 #include <gpio.h>
-#include "driver/uart.h"
-#include "driver/dht22.h"
+#include "stdout/stdout.h"
+#include "dhtxx/dhtxx.h"
 
-#define DELAY 4000 /* milliseconds */
+#define DHT_SAMPLE_PERIOD 2000 /* milliseconds */
 
-LOCAL os_timer_t dht22_timer;
-extern int ets_uart_printf(const char *fmt, ...);
-int (*console_printf)(const char *fmt, ...) = ets_uart_printf;
+static os_timer_t dht22_timer;
+DHT_Sensor sensors[3];
 
-LOCAL void ICACHE_FLASH_ATTR dht22_cb(void *arg)
-{
-	struct dht_sensor_data* r = DHTRead();
-	float lastTemp = r->temperature;
-	float lastHum = r->humidity;
-	if(r->success)
-	{
+static void ICACHE_FLASH_ATTR
+dht22_timerf(void *arg) {
+
+  static uint8_t i = 0;
+  DHT_Sensor_Output r;
+
+	if(dht_read(sensors+i, &r)) {
+	  float lastTemp = r.temperature;
+	  float lastHum = r.humidity;
 		console_printf("Temperature: %d.%d *C, Humidity: %d.%d %%\r\n", (int)(lastTemp),(int)((lastTemp - (int)lastTemp)*100), (int)(lastHum),(int)((lastHum - (int)lastHum)*100));
-	}
-	else
-	{
+	}	else {
 		console_printf("Error reading temperature and humidity\r\n");
 	}
+	i=i>=2?0:i+1;
 }
 
-void user_init(void)
+void dht22_setup(void) {
+  dht_init(sensors+0, DHT22, 0); // GPIO0
+  dht_init(sensors+1, DHT22, 2); // GPIO2
+  dht_init(sensors+2, DHT22, 3); // GPIO3 (RX)
+
+  os_timer_disarm(&dht22_timer);
+  os_timer_setfn(&dht22_timer, (os_timer_func_t *)dht22_timerf, NULL);
+  os_timer_arm(&dht22_timer, DHT_SAMPLE_PERIOD, true);
+}
+
+void ICACHE_FLASH_ATTR
+user_init(void)
 {
-	uart_init(BIT_RATE_115200, BIT_RATE_115200);
-	DHTInit(DHT22, 2000);
-	os_timer_disarm(&dht22_timer);
-	os_timer_setfn(&dht22_timer, (os_timer_func_t *)dht22_cb, (void *)0);
-	os_timer_arm(&dht22_timer, DELAY, 1);
+  // Make uart0 work with just the TX pin. Baud:115200,n,8,1
+  // The RX pin is now free for GPIO use.
+  stdout_init();
+
+  // turn off WiFi for this console only demo
+  wifi_station_set_auto_connect(false);
+  wifi_station_disconnect();
+
+  dht22_setup();
 }
