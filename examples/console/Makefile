@@ -95,12 +95,12 @@ else
 endif
 #############################################################
 
-BITSEQ_BASE ?= ../..
-MQTT_BASE ?= ../esp_mqtt_subtree
+DHTXX_BASE ?= ../dependencies/dhtxx/../../../
+DEP_BASE ?= ../dependencies
 
 # which modules (subdirectories) of the project to include in compiling
-MODULES         = $(BITSEQ_BASE)/examples/localinclude $(BITSEQ_BASE)/driver/bitseq $(BITSEQ_BASE)/driver/easygpio $(MQTT_BASE)/mqtt $(MQTT_BASE)/modules $(BITSEQ_BASE)/driver/stdout user
-EXTRA_INCDIR    = include $(BITSEQ_BASE)/examples $(SDK_BASE)/../include
+MODULES         = localinclude $(DHTXX_BASE) $(DEP_BASE)/easygpio $(DEP_BASE)/stdout user
+EXTRA_INCDIR    = include $(DHTXX_BASE)/examples $(SDK_BASE)/../include
 
 # libraries used in this project, mainly provided by the SDK
 LIBS		= c gcc hal phy pp net80211 lwip wpa main ssl
