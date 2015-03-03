@@ -30,10 +30,9 @@
 #define DHT_BREAKTIME 20
 #define DHT_MAXCOUNT  32000
 
-DHTType sensor_type;
 #define sleepms(x) os_delay_us((x)*1000);
 
-static inline float scale_humidity(int *data) {
+static inline float scale_humidity(DHTType sensor_type, int *data) {
   if (sensor_type == DHT11) {
     return (float) data[0];
   } else {
@@ -42,7 +41,7 @@ static inline float scale_humidity(int *data) {
   }
 }
 
-static inline float scale_temperature(int *data) {
+static inline float scale_temperature(DHTType sensor_type, int *data) {
   if (sensor_type == DHT11) {
     return (float) data[2];
   } else {
@@ -124,8 +123,8 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
               data[0], data[1], data[2], data[3], data[4], checksum, pin);
     if (data[4] == checksum) {
       // checksum is valid
-      output->temperature = scale_temperature(data);
-      output->humidity = scale_humidity(data);
+      output->temperature = scale_temperature(sensor->type, data);
+      output->humidity = scale_humidity(sensor->type, data);
       os_printf("Temperature =  %d *C, Humidity = %d %% (GPIO%d)\n",
           (int) (output->temperature * 100), (int) (output->humidity * 100), pin);
       return true;
