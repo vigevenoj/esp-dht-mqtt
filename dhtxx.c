@@ -32,6 +32,13 @@
 
 #define sleepms(x) os_delay_us((x)*1000);
 
+#ifdef DHT_DEBUG
+#undef DHT_DEBUG
+#define DHT_DEBUG(...) os_printf(__VA_ARGS__);
+#else
+#define DHT_DEBUG(...)
+#endif
+
 static inline float scale_humidity(DHTType sensor_type, int *data) {
   if (sensor_type == DHT11) {
     return (float) data[0];
@@ -89,7 +96,7 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
   }
 
   if (i == DHT_MAXCOUNT) {
-    os_printf("dht_read:Failed to get reading from GPIO%d, dying\n", pin);
+    DHT_DEBUG("dht_read:Failed to get reading from GPIO%d, dying\n", pin);
     return false;
   }
 
@@ -118,23 +125,23 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
 
   if (j >= 39) {
     checksum = (data[0] + data[1] + data[2] + data[3]) & 0xFF;
-    os_printf("DHT%s: %02x %02x %02x %02x [%02x] CS: %02x (GPIO%d)\n",
+    DHT_DEBUG("DHT%s: %02x %02x %02x %02x [%02x] CS: %02x (GPIO%d)\n",
               sensor->type==DHT11?"11":"22",
               data[0], data[1], data[2], data[3], data[4], checksum, pin);
     if (data[4] == checksum) {
       // checksum is valid
       output->temperature = scale_temperature(sensor->type, data);
       output->humidity = scale_humidity(sensor->type, data);
-      os_printf("Temperature*100 =  %d *C, Humidity*100 = %d %% (GPIO%d)\n",
+      DHT_DEBUG("Temperature*100 =  %d *C, Humidity*100 = %d %% (GPIO%d)\n",
           (int) (output->temperature * 100), (int) (output->humidity * 100), pin);
       return true;
     } else {
-      os_printf("dht_read: Checksum was incorrect after %d bits. Expected %d but got %d (GPIO%d)\n",
+      DHT_DEBUG("dht_read: Checksum was incorrect after %d bits. Expected %d but got %d (GPIO%d)\n",
                 j, data[4], checksum, pin);
       return false;
     }
   } else {
-    os_printf("dht_read: Got too few bits: %d should be at least 40 (GPIO%d)\n", j, pin);
+    DHT_DEBUG("dht_read: Got too few bits: %d should be at least 40 (GPIO%d)\n", j, pin);
     return false;
   }
   return true;

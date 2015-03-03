@@ -37,9 +37,9 @@ dht22_timerf(void *arg) {
     char buff[20];
     os_printf("Temperature: %s *C",dht_float2String(buff, o.temperature));
     os_printf(" Humidity: %s %%",dht_float2String(buff, o.humidity));
-    os_printf(" from sensor on GPIO%d\n", sensors[i].pin);
+    os_printf(" [GPIO%d]\n", sensors[i].pin);
   } else {
-    os_printf("Error reading temperature and humidity from sensor on GPIO%d\n", sensors[i].pin);
+    os_printf("Failed to read temperature and humidity sensor on GPIO%d\n", sensors[i].pin);
   }
   i=i>=(DHT_NUMBER_OF_SENSORS-1)?0:i+1;
 }
