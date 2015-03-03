@@ -125,7 +125,7 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
       // checksum is valid
       output->temperature = scale_temperature(sensor->type, data);
       output->humidity = scale_humidity(sensor->type, data);
-      os_printf("Temperature =  %d *C, Humidity = %d %% (GPIO%d)\n",
+      os_printf("Temperature*100 =  %d *C, Humidity*100 = %d %% (GPIO%d)\n",
           (int) (output->temperature * 100), (int) (output->humidity * 100), pin);
       return true;
     } else {
