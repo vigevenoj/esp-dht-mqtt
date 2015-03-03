@@ -6,7 +6,7 @@ ESP8266 - Driver for the temperature and humidity sensor DHT11 and DHT22
 Вывод 2 DHT22 (DATA_OUT) подключен к GPIO2 ESP-01<br>
 Вывод 3 DHT22 (NC) не используется<br>
 Вывод 4 DHT22 (GND) подключен к GND ESP-01<br>
-Между выводом Vcc и DATA_OUT необходимо подключить подтягивающий резистор 10 кОм.<br>
+Между выводом Vcc и DATA_OUT необходимо подключить подтягивающий резистор 5 кОм.<br>
 
 <b>Сборка под Windows:</b><br>
 1. <a href="http://programs74.ru/get.php?file=EspressifESP8266DevKitX86">Скачайте</a> и установите компилятор и SDK.<br>
@@ -31,7 +31,7 @@ DHT22 1 (Vcc) to Vcc (3.3 Volts) ESP-01<br>
 DHT22 2 (DATA_OUT) to GPIO2 ESP-01<br>
 DHT22 3 (NC)<br>
 DHT22 4 (GND) to GND ESP-01<br>
-Between the terminal Vcc and DATA_OUT need to connect a pullup resistor of 10 ohms.
+Between the terminal Vcc and DATA_OUT need to connect a pullup resistor of 5K ohms.
 
 <b>Building on Windows:</b><br>
 1. <a href="http://programs74.ru/get.php?file=EspressifESP8266DevKitX86">Download</a> and install compiler and SDK.<br>
