@@ -47,13 +47,13 @@ dht22_timerf(void *arg) {
 void ICACHE_FLASH_ATTR
 dht22_setup(void) {
 
-  dht_init(sensors+0, DHT22, 2);  // GPIO2
-  dht_init(sensors+1, DHT22, 4);  // GPIO4
-  dht_init(sensors+2, DHT22, 5);  // GPIO5
-  dht_init(sensors+3, DHT22, 12); // GPIO12
-  dht_init(sensors+4, DHT22, 13); // GPIO13
-  dht_init(sensors+5, DHT22, 14); // GPIO14
-  dht_init(sensors+6, DHT22, 15); // GPIO15
+  dht_init(sensors+0, DHT22, 0);  // GPIO0
+  dht_init(sensors+1, DHT22, 2);  // GPIO2
+  dht_init(sensors+2, DHT22, 4);  // GPIO4
+  dht_init(sensors+3, DHT22, 5);  // GPIO5
+  dht_init(sensors+4, DHT22, 12); // GPIO12
+  dht_init(sensors+5, DHT22, 13); // GPIO13
+  dht_init(sensors+6, DHT22, 14); // GPIO14
 
   os_timer_disarm(&dht22_timer);
   os_timer_setfn(&dht22_timer, (os_timer_func_t *)dht22_timerf, NULL);
