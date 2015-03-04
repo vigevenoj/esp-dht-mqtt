@@ -39,7 +39,8 @@
 #define DHT_DEBUG(...)
 #endif
 
-static inline float scale_humidity(DHTType sensor_type, int *data) {
+static inline float 
+scale_humidity(DHT_Type sensor_type, int *data) {
   if (sensor_type == DHT11) {
     return (float) data[0];
   } else {
@@ -48,7 +49,8 @@ static inline float scale_humidity(DHTType sensor_type, int *data) {
   }
 }
 
-static inline float scale_temperature(DHTType sensor_type, int *data) {
+static inline float 
+scale_temperature(DHT_Type sensor_type, int *data) {
   if (sensor_type == DHT11) {
     return (float) data[2];
   } else {
@@ -64,6 +66,7 @@ static inline float scale_temperature(DHTType sensor_type, int *data) {
 
 /**
  * read the sensor (blocking function)
+ * returns false if it fails to read the sensor
  */
 bool ICACHE_FLASH_ATTR
 dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
@@ -148,20 +151,23 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
 }
 
 /**
- * quick and dirty os_sprintf("%.2f", value) (two decimals).
- * You better be sure that your buffer can hold the string, because there is no snprintf()
- * in the sdk.
+ * Quick and dirty sprintf(buffer, "%.2f", value) (two decimals).
+ * It is not 100% accurate with the last decimal due to rounding errors,
+ * but it seems to be off by at most +-0.01.
+ * You better be sure that your buffer is large enough to hold the produced string.
  */
-char* dht_float2String(char* buffer, float value) {
+char* ICACHE_FLASH_ATTR
+dht_float2String(char* buffer, float value) {
   os_sprintf(buffer, "%d.%d", (int)(value),(int)((value - (int)value)*100));
   return buffer;
 }
 
 /**
- * Initializes the sensor, sets up the GPIO as output
+ * Initializes the sensor, sets up the GPIO as output.
+ * returns false if it fails (e.g if you use bad pin numbers)
  */
 bool ICACHE_FLASH_ATTR
-dht_init(DHT_Sensor *sensor, DHTType dht_type, uint8_t pin) {
+dht_init(DHT_Sensor *sensor, DHT_Type dht_type, uint8_t pin) {
   sensor->type = dht_type;
   sensor->pin = pin;
   bool rv = easygpio_pinMode(pin, EASYGPIO_NOPULL, EASYGPIO_OUTPUT);
