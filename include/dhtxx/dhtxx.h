@@ -19,14 +19,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __DHT22_H__
-#define __DHT22_H__
+#ifndef __DHTXX_H__
+#define __DHTXX_H__
 
 #include "c_types.h"
 
 typedef enum {
   DHT11, DHT22
-} DHTType ;
+} DHTType;
 
 typedef struct {
   float temperature;
@@ -34,14 +34,15 @@ typedef struct {
 } DHT_Sensor_Output;
 
 typedef struct {
+  // private data, don't change anything in here.
+  // Set it with the dht_init() function
   uint8_t pin;
   DHTType type;
 } DHT_Sensor;
 
 /**
- * quick and dirty os_sprintf("%.2f", value) (two decimals).
- * You better be sure that your buffer can hold the string, because there is no snprintf()
- * in the sdk.
+ * quick and dirty sprintf(buffer, "%.2f", value) (two decimals).
+ * You better be sure that your buffer is large enough to hold the produced string.
  */
 char* dht_float2String(char* buffer, float value);
 
@@ -55,4 +56,4 @@ bool dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output);
  */
 bool dht_init(DHT_Sensor *sensor, DHTType dht_type, uint8_t pin);
 
-#endif
+#endif // __DHTXX_H__

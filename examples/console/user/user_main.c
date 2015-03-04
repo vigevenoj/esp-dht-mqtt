@@ -6,18 +6,17 @@
  * 
  *  For a single device, connect as follows:
  *  DHT22 1 (Vcc) to Vcc (3.3 Volts)
- *  DHT22 2 (DATA_OUT) to ESP Pin GPIO2
+ *  DHT22 2 (DATA_OUT) to any of these ESP pins: GPIO0, GPIO2, GPIO4, GPIO5, GPIO12, GPIO13 or GPIO14
+ *          This pin also needs a 5K pull-up resistor connected to Vcc.
  *  DHT22 3 (NC)
  *  DHT22 4 (GND) to GND
- *
- * Between Vcc and DATA_OUT need to connect a pull-up resistor of 10 kOh.
+ * 
+ * When the DHT22 is powered by 3.3 Volt the cables should be less than 30cm long.
  *
  */
 
-#include <ets_sys.h>
 #include <osapi.h>
 #include <os_type.h>
-#include <gpio.h>
 #include "stdout/stdout.h"
 #include "dhtxx/dhtxx.h"
 
@@ -28,7 +27,7 @@ static os_timer_t dht22_timer;
 DHT_Sensor sensors[DHT_NUMBER_OF_SENSORS];
 
 static void ICACHE_FLASH_ATTR
-dht22_timerf(void *arg) {
+dht22_loop(void) {
 
   static uint8_t i = 0;
   DHT_Sensor_Output o;
@@ -56,7 +55,7 @@ dht22_setup(void) {
   dht_init(sensors+6, DHT22, 14); // GPIO14
 
   os_timer_disarm(&dht22_timer);
-  os_timer_setfn(&dht22_timer, (os_timer_func_t *)dht22_timerf, NULL);
+  os_timer_setfn(&dht22_timer, (os_timer_func_t *)dht22_loop, NULL);
   os_timer_arm(&dht22_timer, DHT_SAMPLE_PERIOD, true);
 }
 
