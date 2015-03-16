@@ -4,7 +4,7 @@ ESP8266 - Driver for the temperature and humidity sensor DHT11 and DHT22
 I've modified CHERTS's driver to allow you to connect DHTxx sensors to any of the GPIO pins.<br>
 I also made this project into a pure driver.<br>
 
-Clone this project inside your own project and point your MODULES variable in the Makefile to that folder. 
+Clone this project (and [easygpio](https://github.com/eadf/esp8266_easygpio)) inside your own project and point your MODULES variable in the Makefile to those folders. 
 
 <b>For a single device, connect as follows DHT22/DHT11 to ESP:</b><br>
 DHT 1 (Vcc) to Vcc (3.3 Volts) ESP<br>
