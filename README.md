@@ -13,3 +13,4 @@ DHT 3 (NC)<br>
 DHT 4 (GND) to GND ESP<br>
 Between the terminal Vcc and DATA_OUT you should connect a 5KΩ resistor.
 
+You can connect any GPIO to a DHTxx sensor, including GPIO16. But i don't recommend using GPIO15. A pullip resistor on GPIO15 will cause the ESP to boot in "Boot from SD-card" mode.
