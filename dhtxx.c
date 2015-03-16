@@ -22,7 +22,6 @@
 #include "ets_sys.h"
 #include "osapi.h"
 #include "user_interface.h"
-#include "gpio.h"
 #include "dhtxx/dhtxx.h"
 #include "easygpio/easygpio.h"
 
@@ -81,19 +80,19 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
   data[0] = data[1] = data[2] = data[3] = data[4] = 0;
 
   // Wake up device, 250ms of high
-  GPIO_OUTPUT_SET(pin, 1);
+  easygpio_outputEnable(pin, 1);
   sleepms(250);
   // Hold low for 20ms
-  GPIO_OUTPUT_SET(pin, 0);
+  easygpio_outputSet(pin, 0);
   sleepms(20);
   // High for 40ns
-  GPIO_OUTPUT_SET(pin, 1);
+  easygpio_outputSet(pin, 1);
   os_delay_us(40);
   // Set DHT_PIN pin as an input
-  GPIO_DIS_OUTPUT(pin);
+  easygpio_outputDisable(pin);
 
   // wait for pin to drop?
-  while (GPIO_INPUT_GET(pin) && i < DHT_MAXCOUNT) {
+  while (easygpio_inputGet(pin) && i < DHT_MAXCOUNT) {
     os_delay_us(1);
     i++;
   }
@@ -107,13 +106,13 @@ dht_read(DHT_Sensor *sensor, DHT_Sensor_Output* output) {
   for (i = 0; i < DHT_MAXTIMINGS; i++) {
     // Count high time (in approx us)
     counter = 0;
-    while (GPIO_INPUT_GET(pin) == laststate) {
+    while (easygpio_inputGet(pin) == laststate) {
       counter++;
       os_delay_us(1);
       if (counter == 1000)
         break;
     }
-    laststate = GPIO_INPUT_GET(pin);
+    laststate = easygpio_inputGet(pin);
     if (counter == 1000)
       break;
     // store data after 3 reads
