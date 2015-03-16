@@ -1,3 +1,7 @@
+.cproject
+.project
+.settings
+
 examples/console/localinclude/user_config.h
 examples/mqtt/localinclude/user_config.h
 #Directories
