@@ -1,0 +1,9 @@
+[submodule "examples/dependencies/easygpio"]
+	path = examples/dependencies/easygpio
+	url = git@github.com:eadf/esp8266_easygpio.git
+[submodule "examples/dependencies/stdout"]
+	path = examples/dependencies/stdout
+	url = git@github.com:eadf/esp8266_stdout.git
+[submodule "examples/dependencies/mqtt"]
+	path = examples/dependencies/mqtt
+	url = git@github.com:tuanpmt/esp_mqtt.git
