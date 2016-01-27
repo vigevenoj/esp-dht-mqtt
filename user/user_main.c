@@ -27,6 +27,7 @@ void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status) {
   
   if (status == STATION_GOT_IP) {
+    os_printf("HAVE IP ADDRESS, will connect to mqtt...");
     MQTT_Connect(&mqttClient);
   } else {
     MQTT_Disconnect(&mqttClient);
@@ -56,9 +57,13 @@ loop(void) {
     os_printf("in idle loop");
     if (dht_read(sensors+0, &o)) {
       if (oldHumidity != o.humidity || oldTemperature != o.temperature) { 
-        os_printf(message, "[{'type': 'humidity', 'value' : %d }, 'type' : 'temperature', 'value' : %d ]", o.humidity, o.temperature);
+        char buff[20];
+        os_printf("Current temperature is %s", dht_float2String(buff, o.temperature));
+        os_printf("Current humidity is    %s %%", dht_float2String(buff, o.humidity));
+        os_printf(message, "[{'type': 'humidity', 'value' : %s }, 'type' : 'temperature', 'value' : %s ]", dht_float2String(buff, o.humidity), dht_float2String(buff, o.temperature));
         mqttIsIdle = false;
         sentMessage = true;
+        os_printf("about to publish a message");
         MQTT_Publish(&mqttClient, topic, message, strlen(message), 0, 0); 
         oldHumidity = o.humidity;
         oldTemperature = o.temperature;
@@ -74,14 +79,18 @@ loop(void) {
 
 void ICACHE_FLASH_ATTR
 setup(void) {
-//  dht_init(sensors+0, GPIO12_DHT_TYPE, 12);
-//  CFG_Load();
+  CFG_Load();
+
+  os_printf("calling dht_init");
+  dht_init(sensors+0, GPIO12_DHT_TYPE, 12);
+  os_printf("finished dht_init");
+
+  WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
 
   MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
   MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
   MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
   MQTT_OnPublished(&mqttClient, mqttPublishedCb);
-  WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
 
   // Start loop timer
   os_timer_disarm(&loop_timer);
@@ -95,8 +104,9 @@ user_init(void) {
   // Set up the UART or get garbage output
   uart_div_modify(0, UART_CLK_FREQ / 115200);
   // Set the setup timer
+  os_delay_us(1000000);
+  os_printf("running user init");
   os_timer_disarm(&loop_timer);
   os_timer_setfn(&loop_timer, (os_timer_func_t *) setup, NULL);
   os_timer_arm(&loop_timer, 1000, false);
-  os_printf("ran user init, timer for setup started");
 }
