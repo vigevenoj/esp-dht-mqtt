@@ -1,0 +1,7 @@
+.cproject
+.project
+build/
+firmware/
+localinclude
+.settings
+.DS_Store
