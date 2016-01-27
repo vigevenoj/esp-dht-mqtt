@@ -92,6 +92,8 @@ setup(void) {
 
 void ICACHE_FLASH_ATTR
 user_init(void) {
+  // Set up the UART or get garbage output
+  uart_div_modify(0, UART_CLK_FREQ / 115200);
   // Set the setup timer
   os_timer_disarm(&loop_timer);
   os_timer_setfn(&loop_timer, (os_timer_func_t *) setup, NULL);
