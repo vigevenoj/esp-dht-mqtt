@@ -17,7 +17,7 @@ MQTT_Client mqttClient;
 volatile static bool mqttIsIdle = true;
 static volatile os_timer_t loop_timer;
 DHT_Sensor sensors[1];
-static char topic[40]; 
+static char topic[40] = "sensors/harold/office"; // This probably belongs in user_config
 static char message[200];
 
 static void setup(void);
@@ -27,12 +27,15 @@ void ICACHE_FLASH_ATTR
 wifiConnectCb(uint8_t status) {
   
   if (status == STATION_GOT_IP) {
-    os_printf("HAVE IP ADDRESS, will connect to mqtt...");
+    os_printf("HAVE IP ADDRESS, will connect to mqtt...\n");
     MQTT_Connect(&mqttClient);
-  } else {
-    MQTT_Disconnect(&mqttClient);
-  }
+  } 
+}
 
+void ICACHE_FLASH_ATTR
+mqttConnectedCb(uint32_t *args) {
+  MQTT_Client* client = (MQTT_Client*)args;
+  os_printf("Connected to broker\n");
 }
 
 /**
@@ -41,6 +44,7 @@ wifiConnectCb(uint8_t status) {
 void ICACHE_FLASH_ATTR
 mqttPublishedCb(uint32_t *args) {
   mqttIsIdle = true;
+  os_printf("Published message\n");
 }
 
 /**
@@ -54,16 +58,19 @@ loop(void) {
   DHT_Sensor_Output o;
 
   if (mqttIsIdle) {
-    os_printf("in idle loop");
+    os_printf("in idle loop\n");
     if (dht_read(sensors+0, &o)) {
+      os_printf("Reading sensors\n");
+
       if (oldHumidity != o.humidity || oldTemperature != o.temperature) { 
-        char buff[20];
-        os_printf("Current temperature is %s", dht_float2String(buff, o.temperature));
-        os_printf("Current humidity is    %s %%", dht_float2String(buff, o.humidity));
-        os_printf(message, "[{'type': 'humidity', 'value' : %s }, 'type' : 'temperature', 'value' : %s ]", dht_float2String(buff, o.humidity), dht_float2String(buff, o.temperature));
+        char temperatureBuff[20];
+        char humidityBuff [20];
+        os_printf("Current temperature is %s\n", dht_float2String(temperatureBuff, o.temperature));
+        os_printf("Current humidity is    %s %%\n", dht_float2String(humidityBuff, o.humidity));
+        os_printf("[{'type': 'humidity', 'value' : %s }, {'type' : 'temperature', 'value' : %s }]", dht_float2String(humidityBuff, o.humidity), dht_float2String(temperatureBuff, o.temperature));
+        os_sprintf(message, "[{'type': 'humidity', 'value' : %s }, {'type' : 'temperature', 'value' : %s }]", dht_float2String(humidityBuff, o.humidity), dht_float2String(temperatureBuff, o.temperature));
         mqttIsIdle = false;
         sentMessage = true;
-        os_printf("about to publish a message");
         MQTT_Publish(&mqttClient, topic, message, strlen(message), 0, 0); 
         oldHumidity = o.humidity;
         oldTemperature = o.temperature;
@@ -79,24 +86,21 @@ loop(void) {
 
 void ICACHE_FLASH_ATTR
 setup(void) {
+  os_delay_us(1000000);
   CFG_Load();
-
-  os_printf("calling dht_init");
   dht_init(sensors+0, GPIO12_DHT_TYPE, 12);
-  os_printf("finished dht_init");
-
-  WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
 
   MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
   MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
   MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
+  MQTT_OnConnected(&mqttClient, mqttConnectedCb);
   MQTT_OnPublished(&mqttClient, mqttPublishedCb);
+  WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
 
   // Start loop timer
   os_timer_disarm(&loop_timer);
   os_timer_setfn(&loop_timer, (os_timer_func_t *) loop, NULL);
   os_timer_arm(&loop_timer, SAMPLE_PERIOD, false); 
-  os_printf("ran setup, starting main loop");
 }
 
 void ICACHE_FLASH_ATTR
@@ -105,7 +109,6 @@ user_init(void) {
   uart_div_modify(0, UART_CLK_FREQ / 115200);
   // Set the setup timer
   os_delay_us(1000000);
-  os_printf("running user init");
   os_timer_disarm(&loop_timer);
   os_timer_setfn(&loop_timer, (os_timer_func_t *) setup, NULL);
   os_timer_arm(&loop_timer, 1000, false);
