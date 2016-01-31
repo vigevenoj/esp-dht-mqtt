@@ -17,8 +17,6 @@ MQTT_Client mqttClient;
 volatile static bool mqttIsIdle = true;
 static volatile os_timer_t loop_timer;
 DHT_Sensor sensors[1];
-static char humidityTopic[40] = "sensors/harold/feather/humidity"; // This probably belongs in user_config
-static char temperatureTopic[40] = "sensors/harold/feather/temperature"; // Again, user_config
 
 static void setup(void);
 static void loop(void);
@@ -75,8 +73,8 @@ loop(void) {
         os_sprintf(humidityMessage, "{\"type\": \"humidity\", \"value\" : %s }", dht_float2String(humidityBuff, o.humidity));
         mqttIsIdle = false;
         sentMessage = true;
-        MQTT_Publish(&mqttClient, temperatureTopic, temperatureMessage, strlen(temperatureMessage), 0, 0); 
-        MQTT_Publish(&mqttClient, humidityTopic, humidityMessage, strlen(humidityMessage), 0, 0); 
+        MQTT_Publish(&mqttClient, TEMPERATURE_TOPIC, temperatureMessage, strlen(temperatureMessage), 0, 0); 
+        MQTT_Publish(&mqttClient, HUMIDITY_TOPIC, humidityMessage, strlen(humidityMessage), 0, 0); 
         oldHumidity = o.humidity;
         oldTemperature = o.temperature;
       } // No change in either sensor, try again later
