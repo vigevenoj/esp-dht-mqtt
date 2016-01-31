@@ -17,8 +17,8 @@ MQTT_Client mqttClient;
 volatile static bool mqttIsIdle = true;
 static volatile os_timer_t loop_timer;
 DHT_Sensor sensors[1];
-static char topic[40] = "sensors/harold/office"; // This probably belongs in user_config
-static char message[200];
+static char humidityTopic[40] = "sensors/harold/feather/humidity"; // This probably belongs in user_config
+static char temperatureTopic[40] = "sensors/harold/feather/temperature"; // Again, user_config
 
 static void setup(void);
 static void loop(void);
@@ -65,13 +65,18 @@ loop(void) {
       if (oldHumidity != o.humidity || oldTemperature != o.temperature) { 
         char temperatureBuff[20];
         char humidityBuff [20];
+        char temperatureMessage[64] = "{ \"type\" : \"temperature\", \"value\" : %s, \"units\" : \"C\" }";
+        char humidityMessage[64] = "{ \"type\" : \"humidity\", \"value\" : %s, \"units\" : \"percent\" }";
         os_printf("Current temperature is %s\n", dht_float2String(temperatureBuff, o.temperature));
         os_printf("Current humidity is    %s %%\n", dht_float2String(humidityBuff, o.humidity));
-        os_printf("[{'type': 'humidity', 'value' : %s }, {'type' : 'temperature', 'value' : %s }]", dht_float2String(humidityBuff, o.humidity), dht_float2String(temperatureBuff, o.temperature));
-        os_sprintf(message, "[{'type': 'humidity', 'value' : %s }, {'type' : 'temperature', 'value' : %s }]", dht_float2String(humidityBuff, o.humidity), dht_float2String(temperatureBuff, o.temperature));
+        os_printf("{\"type\": \"humidity\", \"value\" : %s }\n", dht_float2String(humidityBuff, o.humidity));
+        os_printf("{\"type\" : \"temperature\", \"value\" : %s }\n", dht_float2String(temperatureBuff, o.temperature));
+        os_sprintf(temperatureMessage, "{\"type\" : \"temperature\", \"value\" : %s }", dht_float2String(temperatureBuff, o.temperature));
+        os_sprintf(humidityMessage, "{\"type\": \"humidity\", \"value\" : %s }", dht_float2String(humidityBuff, o.humidity));
         mqttIsIdle = false;
         sentMessage = true;
-        MQTT_Publish(&mqttClient, topic, message, strlen(message), 0, 0); 
+        MQTT_Publish(&mqttClient, temperatureTopic, temperatureMessage, strlen(temperatureMessage), 0, 0); 
+        MQTT_Publish(&mqttClient, humidityTopic, humidityMessage, strlen(humidityMessage), 0, 0); 
         oldHumidity = o.humidity;
         oldTemperature = o.temperature;
       } // No change in either sensor, try again later
