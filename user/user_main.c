@@ -100,7 +100,7 @@ setup(void) {
   MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
   MQTT_OnConnected(&mqttClient, mqttConnectedCb);
   MQTT_OnPublished(&mqttClient, mqttPublishedCb);
-  WIFI_Connect(sysCfg.sta_ssid, sysCfg.sta_pwd, wifiConnectCb);
+  WIFI_Connect(STA_SSID, STA_PASS, wifiConnectCb);
 
   // Start loop timer
   os_timer_disarm(&loop_timer);
