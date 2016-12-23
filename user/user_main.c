@@ -1,12 +1,11 @@
 
 #include "ets_sys.h"
 #include "osapi.h"
-
 #include "mqtt.h"
 #include "wifi.h"
-#include "config.h"
 #include "debug.h"
 #include "user_config.h"
+#include "user_config.local.h"
 #include "easygpio/easygpio.h"
 #include "dhtxx.c"
 
@@ -90,15 +89,15 @@ loop(void) {
 void ICACHE_FLASH_ATTR
 setup(void) {
   os_delay_us(1000000);
-  CFG_Load();
+//  CFG_Load();
   dht_init(sensors+0, GPIO12_DHT_TYPE, 12);
 
-  MQTT_InitConnection(&mqttClient, sysCfg.mqtt_host, sysCfg.mqtt_port, sysCfg.security);
-  MQTT_InitClient(&mqttClient, sysCfg.device_id, sysCfg.mqtt_user, sysCfg.mqtt_pass, sysCfg.mqtt_keepalive, 1);
+  WIFI_Connect(STA_SSID, STA_PASS, wifiConnectCb);
+  MQTT_InitConnection(&mqttClient, MQTT_HOST, MQTT_PORT, DEFAULT_SECURITY);
+  MQTT_InitClient(&mqttClient, MQTT_CLIENT_ID, MQTT_USER, MQTT_PASS, MQTT_KEEPALIVE, MQTT_CLEAN_SESSION);
   MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
   MQTT_OnConnected(&mqttClient, mqttConnectedCb);
   MQTT_OnPublished(&mqttClient, mqttPublishedCb);
-  WIFI_Connect(STA_SSID, STA_PASS, wifiConnectCb);
 
   // Start loop timer
   os_timer_disarm(&loop_timer);
