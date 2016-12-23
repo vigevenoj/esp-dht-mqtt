@@ -5,6 +5,9 @@ This program uses [esp\_mqtt](https://github.com/tuanpmt/esp_mqtt), [esp8266\_dh
 ## Installation
 Clone the repository including the subtree modules.
 
+Mount a read-write case-sensitive volume,
+`sudo hdiutil attach -readwrite ~/code/esp-open-sdk/case-sensitive.dmg`
+
 Update your $PATH to include the xtensa-lx106-elf/bin directory
 
 Set $SDK\_BASE to the esp\_iot\_sdk location
